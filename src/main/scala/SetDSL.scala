@@ -33,7 +33,7 @@ object SetDSL:
     Function that creates a binding between a string name and a set of SetType, Adds this binging to the Binding scope Map
      - Returns the set that is assigned
     */
-    def assignSet(name: String, set1:SetType) =
+    def assignSet(name: String, set1:SetType) :SetType =
       if(BindingScope.contains(name))
         BindingScope(name)
       else
@@ -44,7 +44,7 @@ object SetDSL:
     Function that checks the value of a set - Takes a set name parameter that is a string and a value parameter that
     is being checked. If found then return true else return false
     */
-    def checkVal(set1: String, value: Any) =
+    def checkVal(set1: String, value: Any): Boolean =
       if(BindingScope.contains(set1))
         if(BindingScope(set1).contains(value))
           true
@@ -58,7 +58,7 @@ object SetDSL:
     and a value parameter which is the value that should be deleted - Returns a set with deleted value or
     the old set. Is the set cant be found an empty set is returned.
     */
-    def deleteVal(set1:String, value:Any) =
+    def deleteVal(set1:String, value:Any): SetType =
       if(BindingScope.contains(set1))
         if(BindingScope(set1).contains(value))
           BindingScope(set1) -= value
@@ -72,7 +72,7 @@ object SetDSL:
     Function for Cartesian Product - Loops through to and adds a tuple of the cross to a
     new set and returns that set - Takes 2 SetType parameters
      */
-    def crossProduct(set1: SetType, set2: SetType) = {
+    def crossProduct(set1: SetType, set2: SetType) : SetType = {
       val crossSet = scala.collection.mutable.Set.empty[Any]
       set1.foreach(i => set2.foreach(j => crossSet += ((i,j))))
       crossSet
@@ -104,7 +104,7 @@ object SetDSL:
     }
 
 
-  @main def hello : Unit = {
+  @main def hello() : Unit = {
     import SetOps.*
   }
 
