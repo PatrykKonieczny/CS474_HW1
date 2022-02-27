@@ -18,7 +18,7 @@ How to Run
 
 Terminal commands – The user can run the program using terminal commands. They can do this by using cd <dir>, where <dir> is the name of the project directory. Then they can use sbt complie clean run/test to run the program.
 
-InteliJ – The user can run the program through the InteliJ IDE.  Once the IDE is open, the user can select the Open option. From there the user can select project directory.  The user can then compile and run the program through the InteliJ IDE. To do so the user can click on the build option located on the menu bar. Then on the run option located on the menu bar.
+InteliJ – The user can run the program through the InteliJ IDE.  Once the IDE is open, the user can select the Open option. From there the user can select project directory.  The user can then compile and run the program through the InteliJ IDE. To do so the user can click on the build option located on the menu bar. Then on the run option located on the menu bar. If a configuation is needed to run the program, then choose sbt Task.
 
 Using the Language
 
