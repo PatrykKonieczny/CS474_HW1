@@ -4,7 +4,7 @@ Update Notes: I built upon my homework one implemtation in order to include clas
 The tests files that I added for my class operations are: ClassCreateTest, ClassDefTest, ExtendTest, InvokeMethodTest, OverwriteTest.
 In order to use both languages, you have to import the languages. This can be done by using import SetDSL.SetOps.*
 and import  SetDSL.ClassOps.* in the methods you plan to use them. The deliverables that I was failed to implment was 
-multiple parameters in constructors and methods.
+multiple parameters in constructors and methods and nested classes.
 
 
 
@@ -69,4 +69,37 @@ Check(name: “String”, value:  Any) => Boolean
 This expression takes a parameter name of type string and a value of type any. This expression checks if value exists in the set that is bounded to the name that is passed in. This returns true if it exists and false if it does not. 
 
 
- 
+Homework2– Patryk Konieczny  - Patrykk2
+Using the Class Language
+Field(accessType:String, name: String)
+
+The Field method takes an access type as a string and the name of the field which is also a string. This returns a new field object. It is used in the ClassDef method to the create a new field to store in a class definition. This allows the Class Definition of an object to store the necessary data about a field.
+
+Method(accessType:String, name: String, exp: SetOps)
+
+The Method, method takes an access type as a string, the name of the method as a string and an expression that is a setOps expression.  This method returns a new method object. It is used in the ClassDef method to store all the relevant method data.
+
+AssignField(name:String, item:Any)
+
+The AssignField method takes a name string and an item of Any.  This method returns a map of the name and item. It binds the field to a value. It is used inside the constructor to create that mapping.
+
+Constructor(AssignField(name:String, item:Any))
+
+The Constructor method takes an AssignField Expression. This helps create a binding between a field and a value that is defined in the class.  This value is called once a class is instantiated. This implementation only takes one argument of AssignField.
+
+ClassDef(name: String, Field, Constructor , Method)
+
+The ClassDef method creates a new class definition. It takes a name of type string, a Field Method, a Constructor method, and a Method method. This implementation does not consider multiple methods and constructors and nested classes. This Method creates a binding between the name that was given and a new classDef object that holds the field, constructor, and method.
+
+NewObject(name: String, variable : String)
+
+The new NewObject creates a new instance of a class name and creates a binding to the variable. The parameters name and variable are of types string. This returns either the class that is bounded or nothing if it is already bound. This method calls the constructor of the class which created a binding between a field and value.
+
+Extends(parentClass: String, childClass: String)
+
+This Extends method creates a link between a parent and child class. The method takes two parameters a parent class name of type string and a child class name of type string. Both classes should be defined before they are extended. The method Maps a child class to the parent to keep records of which class has a parent.
+
+InvokeMethod(className: String, methodName: String)
+
+The InvokeMethod method executes a chosen method from a chosen class. This method takes a class name as a string and a method name as a string. The class name is the class that you want to invoke the method from, and the method name is the name of that method. In this implementation the class should be instantiated by using the NewObject method prior to using the InvokeMethod method. The class name that is passed into the method should be the variable that is bounded to the class when creating a new instance with NewObject. 
+

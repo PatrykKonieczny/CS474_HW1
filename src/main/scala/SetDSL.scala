@@ -257,9 +257,6 @@ object SetDSL:
   @main def hello() : Unit = {
     import SetOps.*
     import ClassOps.*
-    val someClass = ClassDef("classNew",Field("public","x"), Constructor(AssignField("x", 5)),Method("public","m1", Union(Insert(1), Insert(3)))).evalClassDef
-    NewObject("classNew", "aClass").evalClass
-    val methodCall = InvokeMethod("aClass", "m1").evalClass
-    println(methodCall)
+
   }
 
