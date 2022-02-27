@@ -1,4 +1,12 @@
-Homework1 – Patryk Konieczny
+Homework 2 – Patryk Konieczny - patrykk2
+
+Update Notes: I built upon my homework one implemtation in order to include class operations.
+The tests files that I added for my class operations are: ClassCreateTest, ClassDefTest, ExtendTest, InvokeMethodTest, OverwriteTest.
+In order to use both languages, you have to import the languages. This can be done by using import SetDSL.SetOps.*
+and import  SetDSL.ClassOps.* in the methods you plan to use them. The deliverables that I was failed to implment was 
+multiple parameters in constructors and methods.
+
+
 
 How to Download
 
