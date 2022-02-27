@@ -105,21 +105,21 @@ object SetDSL:
   import scala.collection.mutable.Map
   type SetType = scala.collection.mutable.Set[Any]
   private val BindingScope: Map[String, SetType] = scala.collection.mutable.Map()
-  private val ClassDefinition: Map[String, classDef] = scala.collection.mutable.Map()
-  private val ClassBinding: Map[String, classDef] = scala.collection.mutable.Map()
-  private val ParentTable: Map[String, String] = scala.collection.mutable.Map()
+  private val ClassDefinition: mutable.Map[String, classDef] = scala.collection.mutable.Map()
+  private val ClassBinding: mutable.Map[String, classDef] = scala.collection.mutable.Map()
+  private val ParentTable: mutable.Map[String, String] = scala.collection.mutable.Map()
 
   // a field class that holds data that a field needs
   class field(axsType: String, name: String):
     val accessType: String = axsType
     val fieldName: String = name
-    val fieldVal: collection.mutable.Map[String,Any] = Map()
+    val fieldVal: collection.mutable.Map[String,Any] = mutable.Map()
 
   // a method class that holds data that a method needs
   class method(axsType: String, name:String, exp: SetOps):
     val accessType: String = axsType
     val methodName: String = name
-    val expressions: Map[String, SetOps] = Map(name -> exp)
+    val expressions: mutable.Map[String, SetOps] = mutable.Map(name -> exp)
 
   //a classDef class that holds data that a class needs
   class classDef(f: field, const: scala.collection.mutable.Map[String, Any], meth: method):
@@ -148,9 +148,9 @@ object SetDSL:
     }
 
     // evaluate a class constructor to return a maping that assigns a field variable to Any
-    def evalConstructor: Map[String, Any] = {
+    def evalConstructor: mutable.Map[String, Any] = {
       this match{
-        case AssignField(name, item) => Map(name -> item)
+        case AssignField(name, item) => mutable.Map(name -> item)
         case Constructor(exp) =>  exp.evalConstructor
       }
     }
