@@ -3,8 +3,9 @@ Grading
 Maximum grade for this homework is 10%. 
 
 1. Only some basic expression language is implemented without scopes and assignments and macros and nothing else is done.
-Marks deducted: 4%
-Extends and access specifiers are partially implemented.
+Marks deducted: 2.5%
+- Extends and access specifiers are partially implemented.
+- Validation by access specifiers are not done. Private and protected variables can be accessed from elements outside.
 
 2. For each use of var instead of val:
 Number of `var` used: 0 
@@ -33,9 +34,10 @@ Comments: N/A
 Marks deducted: 0%
 Comments: N/A
 
-Marks for Homework 1: 6%
+Marks for Homework 1: 7.5%
 
 Comments:
 Extends and access specifiers are partially implemented.
-When new object is created for a sub-class, its parent constructor should also be implemented.
 Validation by access specifiers are not done. Private and protected variables can be accessed from elements outside.
+
+Note: When new object is created for a sub-class, its parent constructor should also be implemented.
