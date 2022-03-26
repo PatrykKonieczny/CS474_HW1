@@ -13,5 +13,6 @@ class ExtendTest extends AnyFlatSpec with Matchers {
     val antherClass = ClassDef("anotherClass",Field("public","ff"), Constructor(AssignField("ff", 90)),Method("public","m8",Intersect(Insert(1, 2), Insert(3, 2)))).evalClassDef
     val ext = Extends("someNewClass", "anotherClass").evalClass
     ext shouldBe "someNewClass"
+    
   }
 }
