@@ -171,7 +171,7 @@ class SetDSL:
   This function declares a new interface and stores it in the Interface Table. The function
   also throws an error if there are concrete methods in the function.
   */
-  def declareInterface(name: String, f: SetDSL.field, method: SetDSL.ClassOps*) : Unit =
+  def declareInterface(name: String, f: SetDSL.field, method: SetDSL.ClassOps*) : Any =
     if(SetDSL.InterfaceTable.contains(name))
       SetDSL.InterfaceTable(name)
     else
@@ -182,6 +182,7 @@ class SetDSL:
       if(concreteMethods.nonEmpty && interfaceMethods.nonEmpty)
         throw new Error("Concrete Methods are not allowed in interface")
       SetDSL.InterfaceTable += (name -> new SetDSL.interface(f, interfaceMethods))
+      SetDSL.InterfaceTable(name)
 
   /*
   This function helps implement an Interface. It stores className that implements a certain Interface.
@@ -261,7 +262,7 @@ object SetDSL:
     case InvokeMethod(className: String, methodName: String)
     case AbstractClassDef(name: String, field: ClassOps, constructor: ClassOps, method: ClassOps*)
     case InterfaceDecl(name: String, field: ClassOps, methods: ClassOps*)
-    case Implements(InterfaceName: String, ImplmentationName: String)
+    case Implements(className: String, ImplmentationName: String)
 
     // evaluate a class field to return a new field instance
     def evalField: field = {

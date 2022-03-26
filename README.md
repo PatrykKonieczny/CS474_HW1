@@ -103,3 +103,20 @@ InvokeMethod(className: String, methodName: String)
 
 The InvokeMethod method executes a chosen method from a chosen class. This method takes a class name as a string and a method name as a string. The class name is the class that you want to invoke the method from, and the method name is the name of that method. In this implementation the class should be instantiated by using the NewObject method prior to using the InvokeMethod method. The class name that is passed into the method should be the variable that is bounded to the class when creating a new instance with NewObject. 
 
+Homework3 
+
+AbstractMethod(name)
+
+This method takes a value name that is a string. This creates an instance of an abstract method. This function returns a method object with an empty expression. Evaluated with .evalMethod.
+
+AbstractClassDef(name, Field, Constructor, Method*)
+
+This method defines an abstract class. It takes a name parameter which is a string. It takes a Field class operation, a constructor operation, and Method operations. This returns an AbstractClass object. It can have both abstract and concrete methods but needs at least one abstract method. Evaluated with .evalAbstractClass.
+
+InterfaceDecl(name, Field, AbstractMethod*)
+
+This method declares an interface. It takes a name parameter which is a string, It takes a Field class operation, and AbstractMethod operations. This declares an interface and then return an interface object. Evaluated with .evalClass.
+
+Implements(className, implementationName)
+
+This method takes two parameters of type string. The class name is the name of the class that is implementing the interface that is passed in implementationName. This method returns a string of the interface being implemented. Evaluated with .evalClass
