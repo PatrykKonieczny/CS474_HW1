@@ -1,6 +1,8 @@
 
 
-import SetDSL.{AbstractClassTable, BindingScope, ClassBinding, ClassDefinition, ClassOps, ImplementTable, InterfaceTable, ParentTable, SetOps, SetType, field, method}
+import SetDSL.SetOps.{Catch, CatchException, ThrowException}
+import SetDSL.{AbstractClassTable, BindingScope, ClassBinding, ClassDefinition, ClassOps, ExceptionTable, ExceptionThrown, ImplementTable, InterfaceTable, ParentTable, SetOps, SetType, field, method}
+import sun.tools.jstat.Expression
 
 import java.util
 import scala.collection.mutable
@@ -203,6 +205,88 @@ class SetDSL:
     else
       SetDSL.ImplementTable(className)
 
+  // This method defines a new exception and adds it to the ExceptionTable.
+  def defineException(name: String, field: SetDSL.field): Any =
+    if(SetDSL.ExceptionTable.contains(name))
+      SetDSL.ExceptionTable.contains(name)
+    else
+      SetDSL.ExceptionTable += (name -> new SetDSL.exception(field))
+
+  /*
+  This method throws a new exception my adding it to a thrown exception map.
+  It also sets the message for the exception.
+  */
+  def newException(name: String, message: String): SetType =
+    if(SetDSL.ExceptionTable.contains(name))
+      SetDSL.ExceptionThrown += (name -> SetDSL.ExceptionTable(name))
+      val fieldName = SetDSL.ExceptionTable(name).field.fieldName
+      SetDSL.ExceptionThrown(name).field.fieldVal += (fieldName -> message)
+      SetDSL.ExceptionTable(name).field.fieldVal += (fieldName -> message)
+      collection.mutable.Set.empty
+    else
+      collection.mutable.Set.empty
+
+  //matches an expression to check if it is a catch expression
+  def expMatch(exp: SetDSL.SetOps) :String=
+    exp match {
+      case Catch(_,_*)=> "Catch"
+      case _ => "None"
+    }
+
+  /*
+  This method acts as the try block for exceptions. The block is expecting the exception name to be thrown and
+  evaluates the list of expressions passed by name. If an exception is thrown and not caught then an error is thrown.
+  */
+  def catchExc(name: => String, expressions: => SetDSL.SetOps*): SetType =
+    if(SetDSL.ExceptionTable.contains(name))
+      expressions.foreach(u =>
+        if ExceptionThrown.isEmpty then u.eval
+        else if expMatch(u) == "Catch" && ExceptionTable.nonEmpty then u.eval)
+        if ExceptionThrown.contains(name) then throw Error("Exception not caught")
+      collection.mutable.Set.empty
+    else
+      throw new Error("Exception not defined")
+
+
+
+  /*
+  This method uses pass by name to evaluate a condition. The thenClause gets evaluated if true. If
+  false the else clause gets evaluated.
+  */
+  def IFF(condition: => Boolean, thenClause: => SetDSL.SetOps, elseClause: => SetDSL.SetOps): SetType =
+    if(condition)
+      thenClause.eval
+    else
+      elseClause.eval
+
+  /*
+  This method takes a name and expressions and executes the list of expressions that is passed as a parameter.
+  This method uses pass by name to do this.
+  */
+  def Catch(name: => String, expressions: => SetDSL.SetOps*): SetType =
+    if(SetDSL.ExceptionThrown.contains(name))
+      expressions.foreach(u =>u.eval)
+      SetDSL.ExceptionThrown -= name
+      collection.mutable.Set.empty
+    else
+      collection.mutable.Set.empty
+
+  /*
+  This method geta the message set by a thrown exception, and returns that message in a set.
+  If the exception does not exist then an empty set is returned
+  */
+  def GetMessage(name: String, fieldName: String): SetType =
+    if(SetDSL.ExceptionTable.contains(name))
+      val fieldVal = SetDSL.ExceptionTable(name).field.fieldVal(fieldName)
+      val message: collection.mutable.Set[Any] = collection.mutable.Set.empty
+      message += fieldVal
+      message
+    else
+      collection.mutable.Set.empty
+
+
+
+
 object SetDSL:
   import scala.collection.mutable.Map
   type SetType = scala.collection.mutable.Set[Any]
@@ -213,12 +297,16 @@ object SetDSL:
   private val InterfaceTable: mutable.Map[String, interface] = scala.collection.mutable.Map()
   private val AbstractClassTable: mutable.Map[String, abstractClass] = scala.collection.mutable.Map()
   private val ImplementTable: mutable.Map[String, String] = scala.collection.mutable.Map()
+  private val ExceptionTable: mutable.Map[String, exception] = scala.collection.mutable.Map()
+  private val ExceptionThrown: mutable.Map[String, exception] = scala.collection.mutable.Map()
+  private val ProgramScopes: mutable.Map[String, Any] = scala.collection.mutable.Map()
 
   // a field class that holds data that a field needs
   class field(axsType: String, name: String):
     val accessType: String = axsType
     val fieldName: String = name
     val fieldVal: collection.mutable.Map[String,Any] = mutable.Map()
+
 
   //a method class that holds data that a method needs
   class method(axsType: String, name:String):
@@ -238,6 +326,7 @@ object SetDSL:
     val construct: scala.collection.mutable.Map[String, Any] = const
     val methods: method = meth
 
+
   //An abstractClass class that holds data needed for an abstract class
   class abstractClass(f:field, const: scala.collection.mutable.Map[String, Any], meth: scala.collection.mutable.Set[method]):
     val fields: field = f
@@ -248,6 +337,12 @@ object SetDSL:
   class interface(f: field, meth:scala.collection.mutable.Set[method] ):
     val fields: field = f
     val methodTable: scala.collection.mutable.Set[method] = meth
+
+  class exception(f: field):
+    val field: field = f
+
+    override def toString: String = f.toString
+
 
   //Class operations defined below
   enum ClassOps:
@@ -263,6 +358,8 @@ object SetDSL:
     case AbstractClassDef(name: String, field: ClassOps, constructor: ClassOps, method: ClassOps*)
     case InterfaceDecl(name: String, field: ClassOps, methods: ClassOps*)
     case Implements(className: String, ImplmentationName: String)
+    case ExceptionClassDef(name: String, field: ClassOps)
+
 
     // evaluate a class field to return a new field instance
     def evalField: field = {
@@ -310,6 +407,7 @@ object SetDSL:
         case Extends(parentClass, childClass) => new SetDSL().extendAClass(parentClass, childClass)
         case InterfaceDecl(name, f, methods*) => new SetDSL().declareInterface(name, f.evalField, methods*)
         case Implements(className, interfaceName) => new SetDSL().implementInterface(className, interfaceName)
+        case ExceptionClassDef(name, f) => new SetDSL().defineException(name, f.evalField)
       }
     }
 
@@ -329,6 +427,11 @@ object SetDSL:
     case Check(obj1: String , obj: Any)
     case Macro(name: String, obj2: SetOps)
     case Scope(name: String, obj2: SetOps)
+    case IF(condition: SetOps, thenBlock: SetOps, elseBlock: SetOps)
+    case ThrowException(name: String, message: String)
+    case CatchException(name: String,expressions: SetOps*)
+    case Catch(name: String, expressions: SetOps*)
+    case GetExceptionMessage(name: String, field: String)
 
     /*
     Function that inserts elements of Any type into a set, which are passed through as parameters. -
@@ -385,6 +488,11 @@ object SetDSL:
         case Assign(obj1, obj2) => new SetDSL().assignSet(obj1, obj2.eval)
         case Macro(name, obj2) => new SetDSL().assignSet(name, obj2.eval)
         case Scope(name: String, obj2: SetOps) => new SetDSL().assignSet(name, obj2.eval)
+        case ThrowException(name, message) => new SetDSL().newException(name, message)
+        case CatchException(name, expressions*) => new SetDSL().catchExc(name, expressions*)
+        case Catch(name, expressions*) => new SetDSL().Catch(name, expressions*)
+        case IF(condition, thenBlock, elseBlock) => new SetDSL().IFF(condition.checkItem, thenBlock, elseBlock)
+        case GetExceptionMessage(name, field) => new SetDSL().GetMessage(name, field)
       }
     }
 
@@ -392,5 +500,6 @@ object SetDSL:
   @main def hello() : Unit = {
     import SetOps.*
     import ClassOps.*
+
   }
 

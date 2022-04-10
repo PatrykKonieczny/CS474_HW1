@@ -1,10 +1,9 @@
-Homework 3 – Patryk Konieczny - patrykk2
+Homework 4 – Patryk Konieczny - patrykk2
 
-Update Notes: I built upon my homework one and two implemtation in order to include abstract classes and interfaces.
-The tests files that I added for this homework are: ExtendTest2, ImplementsTest, InterfaceTest, ObjectCreation, and AbstractClassTest
+Update Notes: This homework includes updates for branching and exceptions.
+The tests that I added for this homework are TryTest, IFTest, ExceptionDefTest, CatchTest, and CatchErrorTest.
 In order to use both languages, you have to import the languages. This can be done by using import SetDSL.SetOps.*
-and import  SetDSL.ClassOps.* in the methods you plan to use them. The deliverables that I was failed to implment was 
-nested classes and interfaces. Additionally, access specifiers. 
+and import  SetDSL.ClassOps.* in the methods you plan to use them.
 
 
 
@@ -120,3 +119,31 @@ This method declares an interface. It takes a name parameter which is a string, 
 Implements(className, implementationName)
 
 This method takes two parameters of type string. The class name is the name of the class that is implementing the interface that is passed in implementationName. This method returns a string of the interface being implemented. Evaluated with .evalClass
+
+Homework 4 – patrykk2
+
+Evaluated using .evalClass
+ExceptionClassDef(name: String, field: Field(axs, name))
+
+This method defines a new exception. It takes a name parameter, which is of type string, and a field parameter which is a Field expression(which takes a access type parameter and a name parameter and both are strings).
+
+Evaluated using .eval
+IF(condition: Check(), thenBlock: SetOps, elseBlock: SetOps)
+
+The IF method takes a Boolean condtition. The only Boolean condition that is available in the SetOps library is Check, so that is the only expression that can be taken. The thenBlock and elseBlock parameters are of type set ops. The thenBlock set operation executes if the condition is true and the elseBlock condition executes if the condition is false.
+
+ThrowException(name: String, message: String)
+
+This method takes a name of an already defined exception, and a message that should be connected to that expression. This method throws a new exception and can only be thrown from inside the CatchException function. This method bypasses all expressions till a Catch expression is reached. If the catch exception is not reached an error occurs because the exception was not caught.
+
+CatchException(name: String , expressions: SetOps*)
+
+This method takes a name perameter of type string, and a list of set expressions of type SetOps. The name is the name of a defined Exception which can be thrown from within this expression. The list of expressions are any SetOps expressions that are evaluated with .eval.
+
+Catch(name: String, expressions: SetOps*)
+
+This method takes a parameter name of type string and a list of expressions of type SetOps. The name is the name of the exception that is being caught and the list of expressions are any SetOps expressions that are evaluated with .eval.
+
+GetExceptionMessage(name: String, fieldName:String)
+
+This method takes a parameter name of type string and a fieldName of type string. The name is of a thrown exception that you would like to get the message from. The field name is the name of the field when the exception was defined. This method returns the message of the exception in a Set. 
