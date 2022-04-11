@@ -4,6 +4,8 @@ Update Notes: This homework includes updates for branching and exceptions.
 The tests that I added for this homework are TryTest, IFTest, ExceptionDefTest, CatchTest, and CatchErrorTest.
 In order to use both languages, you have to import the languages. This can be done by using import SetDSL.SetOps.*
 and import  SetDSL.ClassOps.* in the methods you plan to use them.
+Additionally when testing all of the tests using sbt in the terminal, the CatchErrorTest causes some of the tests
+to fail. When that test is isolated out of the rest of the tests they pass.
 
 
 
