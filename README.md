@@ -1,11 +1,10 @@
-Homework 4 – Patryk Konieczny - patrykk2
+Homework 5 – Patryk Konieczny - patrykk2
 
 Update Notes: This homework includes updates for branching and exceptions.
-The tests that I added for this homework are TryTest, IFTest, ExceptionDefTest, CatchTest, and CatchErrorTest.
+The tests that I added for this homework are UnionOpTest, PartialTest, MapTest, InterOpTest, and ComplimentTest.
 In order to use both languages, you have to import the languages. This can be done by using import SetDSL.SetOps.*
 and import  SetDSL.ClassOps.* in the methods you plan to use them.
-Additionally when testing all of the tests using sbt in the terminal, the CatchErrorTest causes some of the tests
-to fail. When that test is isolated out of the rest of the tests they pass.
+
 
 
 
@@ -149,3 +148,23 @@ This method takes a parameter name of type string and a list of expressions of t
 GetExceptionMessage(name: String, fieldName:String)
 
 This method takes a parameter name of type string and a fieldName of type string. The name is of a thrown exception that you would like to get the message from. The field name is the name of the field when the exception was defined. This method returns the message of the exception in a Set. 
+
+Patryk Konieczny – patrykk2
+Assignment 5
+
+Partial Evaluation –
+To partially evaluate an expression, use .eval on a Set Expression from SetOps defined in the DSL. Partial evaluation returns an evaluated set only if the variables are defined and bound to a set. If there is a variable that does not have a binding, then an expression is returned with the Var() expression and any bound variables evaluated to sets. Partial evaluations are valid for all set operations. It also removes the error for trying to evaluate a variable that is not bound. The partial evaluation was implemented by returning changing the type of the eval function to the union type of SetOps | SetType. I also changed the parameters of certain expressions to be of type SetOps | SetType. This allowed me to either return a set when an expression had a binding or return an expression that was a combination of a sets and expressions.
+
+.map() –
+The .map function is used to optimize the Set DSL expressions. To use the map use .map on the SetOps expressions that are available to optimize. The map function partially evaluates the expression first and the optimizes the function with the passed function.
+
+Available optimizations –
+.map(e => new SetDSL.unionEval(e))
+This optimization transforms an expression that is trying to union an empty set with a non-empty set. This set returns the expression of the non-empty set. This optimization is only allowed to be used in this case.
+
+.map(e => new SetDSL.interEval(e))
+This optimization transforms an expression that is trying to intersect an empty set with a non-empty set. This set returns an empty set. This optimization is only allowed to be used in this case.
+
+.map(e => new SetDSL.complimentEval(e))
+This optimization transforms an expression that is trying to compliment itself. This set returns an empty set. This optimization is only allowed to be used in this case. 
+

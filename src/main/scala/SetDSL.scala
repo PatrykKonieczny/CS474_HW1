@@ -1,7 +1,6 @@
 
-
-import SetDSL.SetOps.{Catch, CatchException, ThrowException}
-import SetDSL.{AbstractClassTable, BindingScope, ClassBinding, ClassDefinition, ClassOps, ExceptionTable, ExceptionThrown, ImplementTable, InterfaceTable, ParentTable, SetOps, SetType, field, method}
+import SetDSL.SetOps.{Catch, CatchException, Intersect, ThrowException, Union}
+import SetDSL.{AbstractClassTable, BindingScope, ClassBinding, ClassDefinition, ClassOps, ExceptionTable, ExceptionThrown, ImplementTable, InterfaceTable, ParentTable, PartialExpressions, SetOps, SetType, field, method}
 import sun.tools.jstat.Expression
 
 import java.util
@@ -9,6 +8,38 @@ import scala.collection.mutable
 import scala.runtime.Nothing$
 
 class SetDSL:
+  // This method returns a set bound to variable or a the expression Var() if not bound.
+  def PartialEval(variable: String, expression: SetOps): SetType | SetOps=
+    if(BindingScope.contains(variable))
+      BindingScope(variable)
+    else
+      PartialExpressions += expression
+      expression
+
+  // Optimization for set intersection - returns empty set if empty set is intersected with another set
+  def interEval(exp: SetType | SetDSL.SetOps): SetType | SetDSL.SetOps =
+    exp match {
+      case Intersect(_,emptySet) if emptySet==collection.mutable.Set.empty => emptySet
+      case Intersect(emptySet,_) if emptySet==collection.mutable.Set.empty => emptySet
+      case _ => exp
+    }
+
+  // optimization for compliment - returns empty set if set difference is with itself.
+  def complimentEval(exp: SetType | SetDSL.SetOps): SetType | SetDSL.SetOps =
+    exp match {
+      case SetOps.SetDifference(a, b) if a==b => scala.collection.mutable.Set.empty
+      case _ => exp
+    }
+
+  // optimization for union - returns a the expression that is unionized with a empty set
+  def unionEval(exp: SetType | SetDSL.SetOps): SetDSL.SetType | SetDSL.SetOps =
+    val emptySet = scala.collection.mutable.Set.empty
+    exp match{
+      case Union(a, b) if a == scala.collection.mutable.Set.empty => b
+      case Union(a, b) if b == scala.collection.mutable.Set.empty => a
+      case _ => exp
+    }
+
   def assignSet(name: String, set1:SetDSL.SetType) :SetDSL.SetType =
     if(SetDSL.BindingScope.contains(name))
       SetDSL.BindingScope(name)
@@ -35,7 +66,7 @@ class SetDSL:
   and a value parameter which is the value that should be deleted - Returns a set with deleted value or
   the old set. Is the set cant be found an empty set is returned.
   */
-  def deleteVal(set1:String, value:Any): SetDSL.SetType =
+  def deleteVal(set1: String, value:Any): SetDSL.SetOps | SetType =
     if(SetDSL.BindingScope.contains(set1))
       if(SetDSL.BindingScope(set1).contains(value))
         SetDSL.BindingScope(set1) -= value
@@ -43,7 +74,7 @@ class SetDSL:
       else
         SetDSL.BindingScope(set1)
     else
-      scala.collection.mutable.Set.empty[Any]
+      SetDSL.SetOps.Delete(set1, value)
 
 
   /*
@@ -255,9 +286,9 @@ class SetDSL:
   */
   def IFF(condition: => Boolean, thenClause: => SetDSL.SetOps, elseClause: => SetDSL.SetOps): SetType =
     if(condition)
-      thenClause.eval
+      thenClause.eval.asInstanceOf[SetType]
     else
-      elseClause.eval
+      elseClause.eval.asInstanceOf[SetType]
 
   /*
   This method takes a name and expressions and executes the list of expressions that is passed as a parameter.
@@ -287,9 +318,10 @@ class SetDSL:
 
 
 
-object SetDSL:
+object SetDSL :
   import scala.collection.mutable.Map
   type SetType = scala.collection.mutable.Set[Any]
+  type PartialExp = scala.collection.mutable.Set[Any] | SetOps
   private val BindingScope: mutable.Map[String, SetType] = scala.collection.mutable.Map()
   private val ClassDefinition: mutable.Map[String, classDef] = scala.collection.mutable.Map()
   private val ClassBinding: mutable.Map[String, classDef] = scala.collection.mutable.Map()
@@ -300,6 +332,7 @@ object SetDSL:
   private val ExceptionTable: mutable.Map[String, exception] = scala.collection.mutable.Map()
   private val ExceptionThrown: mutable.Map[String, exception] = scala.collection.mutable.Map()
   private val ProgramScopes: mutable.Map[String, Any] = scala.collection.mutable.Map()
+  private val PartialExpressions: mutable.Set[Any] = scala.collection.mutable.Set.empty
 
   // a field class that holds data that a field needs
   class field(axsType: String, name: String):
@@ -418,16 +451,16 @@ object SetDSL:
     case Var(input: String)
     case Insert(input: Any*)
     case Delete(set1: String, input: Any)
-    case Union(set1: SetOps, set2: SetOps)
-    case Intersect(set1: SetOps, set2: SetOps)
-    case SetDifference(set1: SetOps, set2: SetOps)
-    case SymmDifference(set1: SetOps, set2: SetOps)
-    case CartProduct(set1: SetOps , set2: SetOps)
+    case Union(set1: SetOps | SetType, set2: SetOps | SetType)
+    case Intersect(set1: SetOps | SetType, set2: SetOps | SetType)
+    case SetDifference(set1: SetOps | SetType, set2: SetOps | SetType)
+    case SymmDifference(set1: SetOps | SetType, set2: SetOps | SetType)
+    case CartProduct(set1: SetOps | SetType, set2: SetOps | SetType)
     case Assign (obj1: String, obj2: SetOps)
     case Check(obj1: String , obj: Any)
     case Macro(name: String, obj2: SetOps)
     case Scope(name: String, obj2: SetOps)
-    case IF(condition: SetOps, thenBlock: SetOps, elseBlock: SetOps)
+    case IF(condition: SetOps, thenBlock: SetOps | SetType, elseBlock: SetOps | SetType)
     case ThrowException(name: String, message: String)
     case CatchException(name: String,expressions: SetOps*)
     case Catch(name: String, expressions: SetOps*)
@@ -439,7 +472,9 @@ object SetDSL:
     */
     def insertElem( elem: Any*): scala.collection.mutable.Set[Any] =
       val newSet = scala.collection.mutable.Set.empty[Any]
-      elem.foreach(e => newSet += e)
+      if(elem.nonEmpty){
+        elem.foreach(e => newSet += e)
+      }
       newSet
 
 
@@ -467,6 +502,12 @@ object SetDSL:
       crossSet
     }
 
+    def IFF(condition: => Boolean, thenClause: => SetOps | SetType, elseClause: => SetOps | SetType): SetOps | SetType =
+      if(condition)
+        evalType(thenClause)
+      else
+        evalType(elseClause)
+
 
     // Function to evaluate value checks in sets - Returns a boolean
     def checkItem: Boolean =
@@ -474,32 +515,67 @@ object SetDSL:
         case Check(obj1, obj2) => checkVal(obj1,obj2)
       }
 
-    // Function to evaluate set operations - Returns a SetType
-    def eval: SetType = {
+
+    //If set is type setOp returns the evaluation else if set is SetType it returns itself
+    def evalType(set: SetOps | SetType): SetType | SetOps=
+      set match {
+        case op: SetOps => op.eval
+        case s: SetType => s
+      }
+
+    //noinspection ScalaDeprecation
+    // Returns a SetOps if partially evaluated or a set if fully evaluated. Takes 2 union types and expression that is being evaluated
+    def setMethods(s1 : SetOps | SetType , s2: SetType | SetOps, exp: SetOps ): SetType | SetOps =
+      val set = evalType(s1)
+      val other = evalType(s2)
+      if(!PartialExpressions.contains(s1) && !PartialExpressions.contains(s2))
+        exp match {
+          case SetOps.Union(_,_) => set.asInstanceOf[SetType] | other.asInstanceOf[SetType]
+          case SetOps.Intersect(_,_) =>set.asInstanceOf[SetType] & other.asInstanceOf[SetType]
+          case SetOps.SetDifference(_,_) =>set.asInstanceOf[SetType] &~ other.asInstanceOf[SetType]
+          case SetOps.SymmDifference(_,_) => set.asInstanceOf[SetType] -- other.asInstanceOf[SetType]
+          case SetOps.CartProduct(_,_)=> crossProduct(set.asInstanceOf[SetType],other.asInstanceOf[SetType])
+        }
+      else
+        exp match {
+          case SetOps.Union(_,_) => Union(set, other)
+          case SetOps.Intersect(_,_) => Intersect(set, other)
+          case SetOps.SetDifference(_,_) => SetDifference(set,other)
+          case SetOps.SymmDifference(_,_) => SymmDifference(set,other)
+          case SetOps.CartProduct(_,_) => CartProduct(set,other)
+        }
+
+    //Partially evaluates the expressions and applies the function f to them
+    def map(f: SetType | SetOps => SetType | SetOps) : SetType | SetOps = f(this.eval)
+
+
+    // Function to evaluate set operations - Returns a SetType or SetOperation
+    def eval: SetType | SetOps = {
       this match{
-        case Var(input) => BindingScope(input)
+        case Var(input) => new SetDSL().PartialEval(input, Var(input))
         case Insert( elem*) => insertElem( elem*)
         case Delete(set1, elem) => new SetDSL().deleteVal(set1, elem)
-        case Union(set1, set2) => set1.eval | set2.eval
-        case Intersect(set1, set2) => set1.eval & set2.eval
-        case SetDifference(set1, set2) => set1.eval &~ set2.eval
-        case SymmDifference(set1, set2) => (set1.eval -- set2.eval) | (set2.eval -- set1.eval)
-        case CartProduct(set1, set2) => crossProduct(set1.eval, set2.eval)
-        case Assign(obj1, obj2) => new SetDSL().assignSet(obj1, obj2.eval)
-        case Macro(name, obj2) => new SetDSL().assignSet(name, obj2.eval)
-        case Scope(name: String, obj2: SetOps) => new SetDSL().assignSet(name, obj2.eval)
+        case Union(set1, set2) => setMethods(set1 , set2, this)
+        case Intersect(set1, set2) => setMethods(set1 , set2, this)
+        case SetDifference(set1, set2) => setMethods(set1 , set2, this)
+        case SymmDifference(set1, set2) => setMethods(set1 , set2, this)
+        case CartProduct(set1, set2) => setMethods(set1 , set2, this)
+        case Assign(obj1, obj2) => new SetDSL().assignSet(obj1, obj2.eval.asInstanceOf[SetType])
+        case Macro(name, obj2) => new SetDSL().assignSet(name, obj2.eval.asInstanceOf[SetType])
+        case Scope(name: String, obj2: SetOps) => new SetDSL().assignSet(name, obj2.eval.asInstanceOf[SetType])
         case ThrowException(name, message) => new SetDSL().newException(name, message)
         case CatchException(name, expressions*) => new SetDSL().catchExc(name, expressions*)
         case Catch(name, expressions*) => new SetDSL().Catch(name, expressions*)
-        case IF(condition, thenBlock, elseBlock) => new SetDSL().IFF(condition.checkItem, thenBlock, elseBlock)
+        case IF(condition, thenBlock, elseBlock) => IFF(condition.checkItem, thenBlock, elseBlock)
         case GetExceptionMessage(name, field) => new SetDSL().GetMessage(name, field)
       }
     }
-
 
   @main def hello() : Unit = {
     import SetOps.*
     import ClassOps.*
 
+    Assign("w", Insert("elephant","bear")).eval
+    println(Union(Var("x"),Intersect(Var("y"),Union(Var("z"), Var("w")))).eval)
   }
 
